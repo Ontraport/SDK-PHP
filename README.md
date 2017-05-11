@@ -23,8 +23,6 @@ To use the library, include Composer's autoload in your scripts:
 ```
 require_once('vendor/autoload.php');
 ```
-For more information about Composer, see their getting started page.
-
 ## Manual Installation
 If you are not using composer, you can download the latest version. Make sure to include the Ontraport.php file to use this library in your code:
 ```
