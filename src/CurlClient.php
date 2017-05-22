@@ -96,21 +96,24 @@ class CurlClient
     {
         $missingParams = array();
 
-        foreach ($requiredParams as $requiredParam)
+        if ($requiredParams && is_array($requiredParams))
         {
-            if (!array_key_exists($requiredParam, $requestParams))
+            foreach ($requiredParams as $requiredParam)
             {
-                // Covers special case: when ids is required, group_ids can be substituted
-                if ($requiredParam == "ids")
+                if (!array_key_exists($requiredParam, $requestParams))
                 {
-                    if (!array_key_exists("group_ids", $requestParams))
+                    // Covers special case: when ids is required, group_ids can be substituted
+                    if ($requiredParam == "ids")
+                    {
+                        if (!array_key_exists("group_ids", $requestParams))
+                        {
+                            $missingParams[] = $requiredParam;
+                        }
+                    }
+                    else
                     {
                         $missingParams[] = $requiredParam;
                     }
-                }
-                else
-                {
-                    $missingParams[] = $requiredParam;
                 }
             }
         }
