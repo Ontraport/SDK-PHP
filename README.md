@@ -9,13 +9,13 @@ Visit our [API documentation](https://api.ontraport.com/doc) page for detailed u
 ## Composer
 If you are using composer, you can install our SDK on the command line by entering
 ```
-composer require Ontraport/SDK
+composer require Ontraport/SDK-PHP
 ```
 You can also manually add it to your `composer.json` file:
 ```
 {
     "require": {
-        "Ontraport/SDK": "*"
+        "Ontraport/SDK-PHP": "*"
     }
 }
 ```
