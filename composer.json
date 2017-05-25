@@ -1,0 +1,21 @@
+{
+  "name": "ontraport/sdk-php",
+  "description": "ONTRAPORT PHP Library",
+  "keywords": ["ONTRAPORT", "php", "SDK", "library"],
+  "homepage": "https://api.ontraport.com",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "ONTRAPORT",
+      "homepage": "https://github.com/Ontraport"
+    }
+  ],
+  "require": {
+    "php": ">=5.3.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "OntraportAPI\\":"src/"
+    }
+  }
+}
