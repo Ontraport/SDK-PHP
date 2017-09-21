@@ -16,8 +16,7 @@ class APIAutoloader
         // Ensure correct path
         if (strpos($className, "\\"))
         {
-            $className = explode("\\", $className);
-            $className = $className[1];
+            $className = array_pop(explode("\\", $className));
         }
 
         $file = dirname(__FILE__) . "/" . $className . '.php';
@@ -25,7 +24,10 @@ class APIAutoloader
         if (file_exists($file))
         {
             require_once($file);
-            return;
+        }
+        else if (strpos($file, "Exception"))
+        {
+            require_once(dirname(__FILE__) . '/Exceptions/OntraportAPIException.php');
         }
     }
 }

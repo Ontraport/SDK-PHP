@@ -48,6 +48,21 @@ class Forms extends BaseApi
     }
 
     /**
+     * @brief Retrieve multiple forms according to specific criteria, handle pagination
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with GET request. All parameters are optional but if "ids"
+     *                               are not specified, all will be selected.
+     *                               Possible array keys: "ids","start","range","sort","sortDir","condition","search",
+     *                                                    "searchNotes","group_ids","performAll","externs","listFields"
+     *
+     * @return string JSON formatted array of response data: each page of data will be an element in that array
+     */
+    public function retrieveMultiplePaginated($requestParams)
+    {
+        return parent::_retrieveMultiplePaginated($requestParams);
+    }
+
+    /**
      * @brief Retrieve multiple forms according to specific criteria
      *
      * @param mixed[] $requestParams Array of parameters to submit with GET request. All parameters are optional but if "ids"

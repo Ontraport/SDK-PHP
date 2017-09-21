@@ -74,6 +74,32 @@ abstract class BaseApi
     }
 
     /**
+     * @brief Retrieve multiple objects according to specific criteria, handle pagination
+     *
+     * @param $requestParams mixed[] Array of parameters to submit with GET request. If "ids"
+     *                               are not specified, all will be selected.
+     *                               Possible array keys: "objectID" (required),"ids","start","range","sort","sortDir",
+     *                                                    "condition","search","searchNotes","group_ids","performAll",
+     *                                                    "externs","listFields"
+     *
+     * @return string JSON formatted array of paginated response data: each page of data will be an element in that array
+     */
+    protected function _retrieveMultiplePaginated($requestParams)
+    {
+        $collection = json_decode($this->_retrieveCollectionInfo($requestParams), true);
+        $requestParams["start"] = $requestParams["start"] ?: 0;
+        $requestParams["range"] = $requestParams["range"] ?: 50;
+
+        $object_data = array();
+        while ($requestParams["start"] < $collection["data"]["count"])
+        {
+            $object_data[] = json_decode($this->_retrieveMultiple($requestParams), true);
+            $requestParams["start"] += $requestParams["range"];
+        }
+        return json_encode($object_data);
+    }
+
+    /**
      * @brief Retrieve multiple objects according to specific criteria
      *
      * @param mixed[] $requestParams Array of parameters to submit with GET request.

@@ -55,9 +55,11 @@ class CurlClient
      * @param array $requiredParams
      * @param int $method
      *
-     * @throws \Exception
-     *
      * @return boolean
+     *
+     * @throws Exceptions\HttpMethodException
+     * @throws Exceptions\RequiredParamsException
+     * @throws Exceptions\TypeException
      */
     private function _validateRequest($requestParams, $requiredParams, $method)
     {
@@ -65,19 +67,19 @@ class CurlClient
 
         if (!in_array($method, $allowedMethods))
         {
-            throw new \Exception($method . " is not a supported HTTP method.");
+            throw new Exceptions\HttpMethodException($method);
         }
 
         if ($requestParams && (!is_array($requestParams)))
         {
             $dataType = gettype($requestParams);
-            throw new \Exception("Invalid input: expected array, received $dataType");
+            throw new Exceptions\TypeException($dataType);
         }
 
         if ($missingParams = $this->_checkRequiredParams($requestParams, $requiredParams))
         {
             $missingParams = implode(",",$missingParams);
-            throw new \Exception("Invalid input: missing required parameter(s): $missingParams");
+            throw new Exceptions\RequiredParamsException($missingParams);
         }
 
         return true;
@@ -181,7 +183,14 @@ class CurlClient
 
             case "delete":
                 curl_setopt($curlHandle, CURLOPT_CUSTOMREQUEST, "DELETE");
-                $url = $url."?".$requestParams;
+                if ($this->_requestHeaders["Content-Type"] == "Content-Type: application/json")
+                {
+                    curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $requestParams);
+                }
+                else
+                {
+                    $url = $url."?".$requestParams;
+                }
                 break;
         }
 

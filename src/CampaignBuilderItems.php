@@ -3,23 +3,23 @@
 namespace OntraportAPI;
 
 /**
- * Class LandingPages
+ * Class CampaignBuilderItems
  *
  * @author ONTRAPORT
  *
  * @package OntraportAPI
  */
-class LandingPages extends BaseApi
+class CampaignBuilderItems extends BaseApi
 {
     /**
-     * $var string endpoint for single landing page
+     * $var string endpoint for single campaign
      */
-    protected $_endpoint = "LandingPage";
+    protected $_endpoint = "CampaignBuilderItem";
 
     /**
-     * $var string endpoint for plural landing page
+     * $var string endpoint for plural campaigns
      */
-    protected $_endpointPlural = "LandingPages";
+    protected $_endpointPlural = "CampaignBuilderItems";
 
     /**
      * @param Ontraport $client
@@ -29,16 +29,8 @@ class LandingPages extends BaseApi
         parent::__construct($client);
     }
 
-    /*
-     * @TODO This is a placeholder, API needs to be revised to follow one standard for endpoint naming
-     */
-    private $_mainLandingPageEndpoint = "landingPage";
-
-    // Landing Page specific function endpoint
-    const HOSTED_URL = "getHostedURL";
-
     /**
-     * @brief Retrieve a single specified landing page
+     * @brief Retrieve a single specified campaign
      *
      * @param mixed[] $requestParams The parameters to submit with GET request.
      *                               Possible array keys: "id" (required)
@@ -51,7 +43,7 @@ class LandingPages extends BaseApi
     }
 
     /**
-     * @brief Retrieve multiple landing pages according to specific criteria, handle pagination
+     * @brief Retrieve a list of campaigns, handle pagination
      *
      * @param mixed[] $requestParams Array of parameters to submit with GET request. All parameters are optional but if "ids"
      *                               are not specified, all will be selected.
@@ -66,7 +58,7 @@ class LandingPages extends BaseApi
     }
 
     /**
-     * @brief Retrieve multiple landing pages according to specific criteria
+     * @brief Retrieve a list of campaigns
      *
      * @param mixed[] $requestParams Array of parameters to submit with GET request. All parameters are optional but if "ids"
      *                               are not specified, all will be selected.
@@ -81,7 +73,7 @@ class LandingPages extends BaseApi
     }
 
     /**
-     * @brief Retrieve information (such as number of landing pages) about landing page collection
+     * @brief Retrieve information (such as number of campaigns) about campaign collection
      *
      * @param mixed[] $requestParams Array of parameters to submit with GET request. All parameters are optional.
      *                               Possible array keys: "condition","search","searchNotes","group_ids","performAll"
@@ -94,26 +86,12 @@ class LandingPages extends BaseApi
     }
 
     /**
-     * @brief Retrieve meta for a landing page object
+     * @brief Retrieve meta for a campaign object
      *
-     * @return string JSON formatted meta for landing page object
+     * @return string JSON formatted response
      */
     public function retrieveMeta()
     {
         return parent::_retrieveMeta();
-    }
-
-    /**
-     * @brief Retrieve the permanent URL for a landing page.
-     *
-     * @param mixed[] $requestParams Array of parameters to submit with GET request.
-     *                               Possible array keys: "id" (required)
-     *
-     * @return string JSON formatted response
-     */
-    public function getHostedURL($requestParams)
-    {
-        $requiredParams = array("id");
-        return $this->client->request($requestParams, $this->_mainLandingPageEndpoint . "/" . self::HOSTED_URL, "get", $requiredParams, $options = NULL);
     }
 }

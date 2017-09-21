@@ -61,6 +61,21 @@ class Transactions extends BaseApi
     }
 
     /**
+     * @brief Retrieve multiple transactions according to specific criteria, handle pagination
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with GET request. All parameters are optional but if "ids"
+     *                               are not specified, all will be selected.
+     *                               Possible array keys: "ids","start","range","sort","sortDir","condition","search",
+     *                                                    "searchNotes","group_ids","performAll","externs","listFields"
+     *
+     * @return string JSON formatted array of response data: each page of data will be an element in that array.
+     */
+    public function retrieveMultiplePaginated($requestParams)
+    {
+        return parent::_retrieveMultiplePaginated($requestParams);
+    }
+
+    /**
      * @brief Retrieve multiple transactions according to specific criteria
      *
      * @param mixed[] $requestParams Array of parameters to submit with GET request. All parameters are optional but if "ids"
@@ -155,6 +170,21 @@ class Transactions extends BaseApi
     {
         $requiredParams = array("id");
         return $this->client->request($requestParams, $this->_mainTransactionEndpoint . "/" . self::ORDER, "get", $requiredParams, $options = NULL);
+    }
+
+    /**
+     * @brief Update order information
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with GET request.
+     *                               Possible array keys: "id" (required)
+     *
+     * @return string JSON formatted HTTP response
+     */
+    public function updateOrder($requestParams)
+    {
+        $options["headers"] = self::retrieveContentTypeHeader(self::CONTENT_TYPE_JSON);
+        $requiredParams = array("offer", "contact_id", "gateway_id");
+        return $this->client->request($requestParams, $this->_mainTransactionEndpoint . "/" . self::ORDER, "put", $requiredParams, $options);
     }
 
     /**

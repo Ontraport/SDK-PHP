@@ -14,12 +14,12 @@ require_once("APIAutoloader.php");
 class Ontraport
 {
     /**
-     * @var string the base url http requests are made to
+     * @var string the base URL HTTP requests are made to
      */
     const REQUEST_URL = "https://api.ontraport.com";
 
     /**
-     * @var int the api version number for this wrapper
+     * @var int the API version number for this wrapper
      */
     const API_VERSION = 1;
 
@@ -112,9 +112,9 @@ class Ontraport
     /**
      * @param integer $object
      *
-     * @throws \Exception
-     *
      * @return CustomObjects instance
+     *
+     * @throws Exceptions\CustomObjectException
      */
     public function custom($object)
     {
@@ -130,8 +130,16 @@ class Ontraport
 
         else
         {
-            throw new \Exception("Invalid object ID.");
+            throw new Exceptions\CustomObjectException();
         }
+    }
+
+    /**
+     * @return CampaignBuilderItems
+     */
+    public function campaignbuilder()
+    {
+        return $this->getApi("CampaignBuilderItems");
     }
 
     /**
@@ -156,6 +164,14 @@ class Ontraport
     public function landingpage()
     {
         return $this->getApi("LandingPages");
+    }
+
+    /**
+     * @return Messages
+     */
+    public function message()
+    {
+        return $this->getApi("Messages");
     }
 
     /**

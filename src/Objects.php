@@ -31,9 +31,12 @@ class Objects extends BaseApi
 
     // Object-specific function endpoints
     const TAG = "tag";
+    const TAG_BY_NAME = "tagByName";
     const SEQUENCE = "sequence";
     const PAUSE = "pause";
     const UNPAUSE = "unpause";
+    const SUBSCRIBE = "subscribe";
+    const GET_BY_EMAIL = "getByEmail";
 
     /**
      * @brief Retrieve a single specified object
@@ -53,6 +56,32 @@ class Objects extends BaseApi
     }
 
     /**
+     * @brief Retrieve multiple objects according to specific criteria, handle pagination
+     *
+     * @param $requestParams mixed[] Array of parameters to submit with GET request. If "ids"
+     *                               are not specified, all will be selected.
+     *                               Possible array keys: "objectID" (required),"ids","start","range","sort","sortDir",
+     *                                                    "condition","search","searchNotes","group_ids","performAll",
+     *                                                    "externs","listFields"
+     *
+     * @return string JSON formatted array of response data: each page of data will be an element in that array.
+     */
+    public function retrieveMultiplePaginated($requestParams)
+    {
+        $collection = json_decode($this->retrieveCollectionInfo($requestParams), true);
+        $requestParams["start"] = $requestParams["start"] ?: 0;
+        $requestParams["range"] = $requestParams["range"] ?: 50;
+
+        $object_data = array();
+        while ($requestParams["start"] < $collection["data"]["count"])
+        {
+            $object_data[] = json_decode($this->retrieveMultiple($requestParams), true);
+            $requestParams["start"] += $requestParams["range"];
+        }
+        return json_encode($object_data);
+    }
+
+    /**
      * @brief Retrieve multiple objects according to specific criteria
      *
      * @param $requestParams mixed[] Array of parameters to submit with GET request. If "ids"
@@ -69,6 +98,23 @@ class Objects extends BaseApi
             "objectID"
         );
         return $this->client->request($requestParams, $this->_endpointPlural, "get", $requiredParams , $options = NULL);
+    }
+
+    /**
+     * @brief Retrieves object ID by email.
+     *
+     * @param $requestParams mixed[] Array of parameters to submit with GET request.
+     *                               Possible array keys: "objectID" (required),"email" (required)
+     *
+     * @return string JSON formatted response
+     */
+    public function retrieveIdByEmail($requestParams)
+    {
+        $requiredParams = array(
+            "objectID",
+            "email"
+        );
+        return $this->client->request($requestParams, $this->_endpointPlural . "/" . self::GET_BY_EMAIL, "get", $requiredParams , $options = NULL);
     }
 
     /**
@@ -302,7 +348,28 @@ class Objects extends BaseApi
     }
 
     /**
-     * @brief Remove one or more tags from one or more sequences
+     * @brief Add one or more tags to one or more objects
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with PUT request.
+     *                               Possible array keys:  "objectID" (required),"add_list" (required),"ids","start",
+     *                                                     "range","sort","sortDir","condition","search","searchNotes",
+     *                                                     "group_ids","performAll","externs","listFields".
+     *                                                      Either "ids" or "group_ids" is required.
+     *
+     * @return string JSON formatted HTTP response
+     */
+    public function addTag($requestParams)
+    {
+        $requiredParams = array(
+            "add_list",
+            "ids"
+        );
+        $options["headers"] = self::retrieveContentTypeHeader(self::CONTENT_TYPE_FORM);
+        return $this->client->request($requestParams, $this->_endpointPlural . "/" . self::TAG, "put", $requiredParams, $options);
+    }
+
+    /**
+     * @brief Remove one or more tags from one or more objects
      *
      * @param mixed[] $requestParams Array of parameters to submit with DELETE request.
      *                               Possible array keys:  "objectID" (required),"remove_list" (required),"ids","start",
@@ -323,23 +390,86 @@ class Objects extends BaseApi
     }
 
     /**
-     * @brief Add one or more tags to one or more objects
+     * @brief Add one or more tags to one or more objects by tag name (create tag if it doesn't exist)
      *
      * @param mixed[] $requestParams Array of parameters to submit with PUT request.
-     *                               Possible array keys:  "objectID" (required),"remove_list" (required),"ids","start",
+     *                               Possible array keys:  "objectID" (required),"add_names" (required),"ids","start",
      *                                                     "range","sort","sortDir","condition","search","searchNotes",
      *                                                     "group_ids","performAll","externs","listFields".
      *                                                      Either "ids" or "group_ids" is required.
      *
      * @return string JSON formatted HTTP response
      */
-    public function addTag($requestParams)
+    public function addTagByName($requestParams)
+    {
+        $requiredParams = array(
+            "add_names",
+            "ids"
+        );
+        $options["headers"] = self::retrieveContentTypeHeader(self::CONTENT_TYPE_JSON);
+        return $this->client->request($requestParams, $this->_endpointPlural . "/" . self::TAG_BY_NAME, "put", $requiredParams, $options);
+    }
+
+    /**
+     * @brief Remove one or more tags from one or more objects by tag name
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with DELETE request.
+     *                               Possible array keys:  "objectID" (required),"remove_names" (required),"ids","start",
+     *                                                     "range","sort","sortDir","condition","search","searchNotes",
+     *                                                     "group_ids","performAll","externs","listFields".
+     *                                                      Either "ids" or "group_ids" is required.
+     *
+     * @return string JSON formatted HTTP response
+     */
+    public function removeTagByName($requestParams)
+    {
+        $requiredParams = array(
+            "remove_names",
+            "ids"
+        );
+        $options["headers"] = self::retrieveContentTypeHeader(self::CONTENT_TYPE_JSON);
+        return $this->client->request($requestParams, $this->_endpointPlural . "/" . self::TAG_BY_NAME, "delete", $requiredParams, $options);
+    }
+
+    /**
+     * @brief Add one or more objects to one or more campaigns or sequences
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with PUT request.
+     *                               Possible array keys:  "objectID" (required),"add_list" (required),"ids",
+     *                                                     "sub_type" (default: campaign), "start","range","sort",
+     *                                                     "sortDir","condition","search","searchNotes","group_ids",
+     *                                                     "performAll","externs","listFields".
+     *
+     * @return string JSON formatted HTTP response
+     */
+    public function subscribe($requestParams)
     {
         $requiredParams = array(
             "add_list",
             "ids"
         );
         $options["headers"] = self::retrieveContentTypeHeader(self::CONTENT_TYPE_FORM);
-        return $this->client->request($requestParams, $this->_endpointPlural . "/" . self::TAG, "put", $requiredParams, $options);
+        return $this->client->request($requestParams, $this->_endpointPlural . "/" . self::SUBSCRIBE, "put", $requiredParams, $options);
+    }
+
+    /**
+     * @brief Remove one or more objects from one or more campaigns or sequences
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with DELETE request.
+     *                               Possible array keys:  "objectID" (required),"remove_list" (required),"ids",
+     *                                                     "sub_type" (default: campaign), "start","range","sort",
+     *                                                     "sortDir","condition","search","searchNotes","group_ids",
+     *                                                     "performAll","externs","listFields".
+     *
+     * @return string JSON formatted HTTP response
+     */
+    public function unsubscribe($requestParams)
+    {
+        $requiredParams = array(
+            "remove_list",
+            "ids"
+        );
+        $options["headers"] = self::retrieveContentTypeHeader(self::CONTENT_TYPE_FORM);
+        return $this->client->request($requestParams, $this->_endpointPlural . "/" . self::SUBSCRIBE, "delete", $requiredParams, $options);
     }
 }
