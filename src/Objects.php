@@ -114,7 +114,7 @@ class Objects extends BaseApi
             "objectID",
             "email"
         );
-        return $this->client->request($requestParams, $this->_endpointPlural . "/" . self::GET_BY_EMAIL, "get", $requiredParams , $options = NULL);
+        return $this->client->request($requestParams, $this->_endpoint . "/" . self::GET_BY_EMAIL, "get", $requiredParams , $options = NULL);
     }
 
     /**
