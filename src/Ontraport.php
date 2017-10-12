@@ -95,6 +95,11 @@ class Ontraport
         return $client->httpRequest($requestParams, $url, $method, $requiredParams, $options);
     }
 
+    public function getLastStatusCode()
+    {
+        return $this->getHttpClient()->getLastStatusCode();
+    }
+
     /**
      * @brief constructs an api endpoint
      *
