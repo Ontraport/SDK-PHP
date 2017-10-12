@@ -95,6 +95,11 @@ class Ontraport
         return $client->httpRequest($requestParams, $url, $method, $requiredParams, $options);
     }
 
+    /**
+     * @brief gets the last HTTP status code received by the HTTP Client
+     *
+     * @return int
+     */
     public function getLastStatusCode()
     {
         return $this->getHttpClient()->getLastStatusCode();
