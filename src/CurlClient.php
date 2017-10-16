@@ -183,7 +183,7 @@ class CurlClient
 
             case "delete":
                 curl_setopt($curlHandle, CURLOPT_CUSTOMREQUEST, "DELETE");
-                if ($this->_requestHeaders["Content-Type"] == "Content-Type: application/json")
+                if (array_key_exists("Content-Type", $this->_requestHeaders) && $this->_requestHeaders["Content-Type"] == "Content-Type: application/json")
                 {
                     curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $requestParams);
                 }
