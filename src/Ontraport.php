@@ -87,6 +87,17 @@ class Ontraport
         return $this->_httpClient;
     }
 
+    /**
+     * @brief Make an HTTP request
+     *
+     * @param $requestParams
+     * @param string $url
+     * @param string $method
+     * @param array $requiredParams
+     * @param array $options
+     *
+     * @return mixed
+     */
     public function request($requestParams, $url, $method, $requiredParams, $options)
     {
         $client = $this->getHttpClient();
@@ -100,10 +111,10 @@ class Ontraport
      *
      * @return int
      */
-    public function getLastStatusCode()
-    {
-        return $this->getHttpClient()->getLastStatusCode();
-    }
+     public function getLastStatusCode()
+     {
+         return $this->getHttpClient()->getLastStatusCode();
+     }
 
     /**
      * @brief constructs an api endpoint

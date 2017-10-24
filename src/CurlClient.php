@@ -220,6 +220,6 @@ class CurlClient
      */
     public function getLastStatusCode()
     {
-        return $this->_lastStatusCode;
+         return $this->_lastStatusCode;
     }
 }
