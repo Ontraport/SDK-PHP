@@ -96,6 +96,16 @@ class Ontraport
     }
 
     /**
+     * @brief gets the last HTTP status code received by the HTTP Client
+     *
+     * @return int
+     */
+    public function getLastStatusCode()
+    {
+        return $this->getHttpClient()->getLastStatusCode();
+    }
+
+    /**
      * @brief constructs an api endpoint
      *
      * @param string $extendURL

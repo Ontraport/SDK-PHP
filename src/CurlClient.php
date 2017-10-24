@@ -16,6 +16,11 @@ class CurlClient
      */
     private $_requestHeaders = array();
 
+    /**
+     * @var int the last HTTP status code received
+     */
+    private $_lastStatusCode = null;
+
     public function __construct($apiKey,$siteID)
     {
         $this->_setRequestHeader("Api-key", $apiKey);
@@ -183,7 +188,7 @@ class CurlClient
 
             case "delete":
                 curl_setopt($curlHandle, CURLOPT_CUSTOMREQUEST, "DELETE");
-                if ($this->_requestHeaders["Content-Type"] == "Content-Type: application/json")
+                if (array_key_exists("Content-Type", $this->_requestHeaders) && $this->_requestHeaders["Content-Type"] == "Content-Type: application/json")
                 {
                     curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $requestParams);
                 }
@@ -200,10 +205,21 @@ class CurlClient
         curl_setopt($curlHandle, CURLOPT_TIMEOUT, 60);
 
         $result = curl_exec($curlHandle);
+        $this->_lastStatusCode = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
         curl_close($curlHandle);
 
         unset($this->_requestHeaders["Content-Type"]);
 
         return $result;
+    }
+
+    /**
+     * @brief get the last HTTP status code received
+     *
+     * @return int
+     */
+    public function getLastStatusCode()
+    {
+        return $this->_lastStatusCode;
     }
 }
