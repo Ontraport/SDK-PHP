@@ -24,7 +24,19 @@ To use the library, include Composer's autoload in your scripts:
 require_once('vendor/autoload.php');
 ```
 ## Manual Installation
-Download or clone the latest version of this repo. Make sure to include the Ontraport.php file to use this library in your code:
+If you are not using composer, you can download the latest version. Make sure to include the Ontraport.php file to use this library in your code:
 ```
 require_once('path/to/src/Ontraport.php');
 ```
+## Namespacing
+Our API wrapper is namespaced. 
+This helps you to avoid collisions between the classes and functions in our wrapper and external classes and functions which might have the same name.
+This means if you want to create an instance of the Ontraport class, you need to either import the OntraportAPI namespace:
+```
+use OntraportAPI\Ontraport;
+```
+or use a qualified name:
+```
+$client = new OntraportAPI\Ontraport("2_AppID_12345678","Key5678")
+```
+[Click here](http://php.net/manual/en/language.namespaces.php) for more about namespacing in PHP.
