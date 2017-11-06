@@ -203,8 +203,6 @@ class Transactions extends BaseApi
         $requiredParams = array(
             "contact_id",
             "chargeNow",
-            "invoice_template",
-            "gateway_id",
             "offer"
         );
         return $this->client->request($requestParams, $this->_mainTransactionEndpoint . "/" . self::PROCESS_MANUAL, "post", $requiredParams, $options);
