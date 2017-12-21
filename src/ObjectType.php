@@ -39,6 +39,7 @@ class ObjectType
     const UPSELL_FORM = 42;
     const WORDPRESS_MEMBERSHIP = 43;
     const OPEN_ORDER = 44;
+    const CREDIT_CARD = 45;
     const TRANSACTION = 46;
     const SHIPPED_PACKAGE = 47;
     const SHIPPING_FULFILLMENT = 49;

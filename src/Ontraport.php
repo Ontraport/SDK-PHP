@@ -172,6 +172,14 @@ class Ontraport
     }
 
     /**
+     * @return CreditCards
+     */
+    public function creditcard()
+    {
+        return $this->getApi("CreditCards");
+    }
+
+    /**
      * @return Forms
      */
     public function form()

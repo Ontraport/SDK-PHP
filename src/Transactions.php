@@ -183,7 +183,7 @@ class Transactions extends BaseApi
     public function updateOrder($requestParams)
     {
         $options["headers"] = self::retrieveContentTypeHeader(self::CONTENT_TYPE_JSON);
-        $requiredParams = array("offer", "contact_id", "gateway_id");
+        $requiredParams = array("offer");
         return $this->client->request($requestParams, $this->_mainTransactionEndpoint . "/" . self::ORDER, "put", $requiredParams, $options);
     }
 
