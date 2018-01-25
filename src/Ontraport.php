@@ -260,6 +260,3 @@ class Ontraport
         return $this->_apiInstances[$class];
     }
 }
-
-
-
