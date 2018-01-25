@@ -11,6 +11,16 @@ namespace OntraportAPI;
  */
 class CurlClient
 {
+    const HTTP_OK = 200;
+    const HTTP_BAD_REQUEST = 400;
+    const HTTP_UNAUTHORIZED = 401;
+    const HTTP_FORBIDDEN = 403;
+    const HTTP_NOT_FOUND = 404;
+    const HTTP_RATE_LIMIT = 429;
+    const HTTP_ERROR = 500;
+
+    const RATE_LIMIT_RESET = "x-rate-limit-reset";
+
     /**
      * @var array of headers sent with HTTP requests
      */
@@ -36,6 +46,16 @@ class CurlClient
     private function _setRequestHeader($header, $value)
     {
         $this->_requestHeaders[$header] = $header . ": " . $value;
+    }
+
+    /**
+     * @brief retrieves current request headers
+     *
+     * @return array
+     */
+    public function getRequestHeaders()
+    {
+        return $this->_requestHeaders;
     }
 
     /**
@@ -168,7 +188,7 @@ class CurlClient
         }
 
         $curlHandle = curl_init();
-
+        $headers = array();
         switch(strtolower($method))
         {
             case "post":
@@ -202,14 +222,36 @@ class CurlClient
         curl_setopt($curlHandle, CURLOPT_URL, $url);
         curl_setopt($curlHandle, CURLOPT_HTTPHEADER, $this->_requestHeaders);
         curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curlHandle, CURLOPT_HEADER, false);
+        curl_setopt($curlHandle, CURLOPT_HEADERFUNCTION,
+            function($curl, $header) use (&$headers)
+            {
+                $len = strlen($header);
+                $header = explode(":", $header, 2);
+                if (count($header) < 2)
+                {
+                    return $len;
+                }
+
+                $name = strtolower(trim($header[0]));
+                $headers[$name] = trim($header[1]);
+
+                return $len;
+            }
+        );
         curl_setopt($curlHandle, CURLOPT_TIMEOUT, 60);
 
         $result = curl_exec($curlHandle);
+
         $this->_lastStatusCode = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
+        if ($this->_lastStatusCode == CurlClient::HTTP_RATE_LIMIT)
+        {
+            $result = $this->retry($headers[self::RATE_LIMIT_RESET], $curlHandle);
+        }
+
         curl_close($curlHandle);
 
         unset($this->_requestHeaders["Content-Type"]);
-
         return $result;
     }
 
@@ -221,5 +263,31 @@ class CurlClient
     public function getLastStatusCode()
     {
          return $this->_lastStatusCode;
+    }
+
+    /**
+     * @brief set the last HTTP status code received
+     *
+     * @return int
+     */
+    public function setLastStatusCode($status_code)
+    {
+        $this->_lastStatusCode = $status_code;
+    }
+
+    /**
+     * @brief Retry the request after waiting for the rate limit to roll over
+     *
+     * @param int $wait
+     * @param $curlHandle
+     *
+     * @return mixed
+     */
+    public function retry($wait, $curlHandle)
+    {
+        sleep($wait);
+        $result = curl_exec($curlHandle);
+        $this->_lastStatusCode = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
+        return $result;
     }
 }
