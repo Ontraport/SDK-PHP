@@ -34,6 +34,10 @@ class Forms extends BaseApi
      */
     private $_mainFormEndpoint = "form";
 
+    // Form specific function endpoint
+    const FORM_BLOCKS = "getAllFormBlocks";
+    const FORM_BLOCKS_BY_NAME = "getBlocksByFormName";
+
     /**
      * @brief Retrieve a single specified form
      *
@@ -112,5 +116,32 @@ class Forms extends BaseApi
     {
         $requiredParams = array("id");
         return $this->client->request($requestParams, $this->_mainFormEndpoint, "get", $requiredParams, $options = NULL);
+    }
+
+    /**
+     * @brief Retrieve name and ID pairs for form blocks
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with GET request.
+     *                               Possible array keys: "page"
+     *
+     * @return string JSON formatted response
+     */
+    public function retrieveFormBlocks($requestParams = NULL)
+    {
+        return $this->client->request($requestParams, $this->_endpoint . "/" . self::FORM_BLOCKS, "get", NULL, $options = NULL);
+    }
+
+    /**
+     * @brief Retrieve name and ID pairs for form blocks
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with GET request.
+     *                               Possible array keys: "page"
+     *
+     * @return string JSON formatted response
+     */
+    public function retrieveBlocksByForm($requestParams)
+    {
+        $requiredParams = array("name");
+        return $this->client->request($requestParams, $this->_endpoint . "/" . self::FORM_BLOCKS_BY_NAME, "get", $requiredParams, $options = NULL);
     }
 }

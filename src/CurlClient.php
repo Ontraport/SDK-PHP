@@ -244,7 +244,7 @@ class CurlClient
         $result = curl_exec($curlHandle);
 
         $this->_lastStatusCode = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
-        if ($this->_lastStatusCode == CurlClient::HTTP_RATE_LIMIT)
+        if ($this->_lastStatusCode == self::HTTP_RATE_LIMIT)
         {
             $result = $this->retry($headers[self::RATE_LIMIT_RESET], $curlHandle);
         }
@@ -268,11 +268,11 @@ class CurlClient
     /**
      * @brief set the last HTTP status code received
      *
-     * @return int
+     * @param int $statusCode The code that was received
      */
-    public function setLastStatusCode($status_code)
+    public function setLastStatusCode($statusCode)
     {
-        $this->_lastStatusCode = $status_code;
+        $this->_lastStatusCode = $statusCode;
     }
 
     /**

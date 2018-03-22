@@ -42,12 +42,12 @@ abstract class BaseApi
     const CONTENT_TYPE_FORM = "form";
 
     /**
-     * $var string endpoint for object
+     * @var string endpoint for object
      */
     protected $_endpoint = NULL;
 
     /**
-     * $var string plural endpoint for object
+     * @var string plural endpoint for object
      */
     protected $_endpointPlural = NULL;
 
