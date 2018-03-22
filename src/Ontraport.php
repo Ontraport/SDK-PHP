@@ -43,8 +43,8 @@ class Ontraport
      */
     protected $_customObjects = array();
 
-    /*
-     * @var HttpClient instance
+    /**
+     * @var CurlClient instance
      */
     protected $_httpClient = NULL;
 
@@ -54,10 +54,10 @@ class Ontraport
      * @param string $siteID
      * @param string $apiKey
      */
-    public function __construct($siteID,$apiKey)
+    public function __construct($siteID, $apiKey, $httpClient = null)
     {
         $this->setCredentials($apiKey, $siteID);
-        $this->setHttpClient();
+        $this->setHttpClient($httpClient);
     }
 
     /**
@@ -74,9 +74,14 @@ class Ontraport
     /**
      * @brief sets HTTP client
      */
-    public function setHttpClient()
+    public function setHttpClient($httpClient = null)
     {
-        $this->_httpClient = new CurlClient($this->_apiKey, $this->_siteID);
+        if ($httpClient === null)
+        {
+            $this->_httpClient = new CurlClient($this->_apiKey, $this->_siteID);
+            return;
+        }
+        $this->_httpClient = $httpClient;
     }
 
     /**
@@ -126,8 +131,7 @@ class Ontraport
      */
     public function buildEndpoint($extendURL)
     {
-        $endpoint = self::REQUEST_URL . "/" . self::API_VERSION . "/" . $extendURL;
-        return $endpoint;
+        return self::REQUEST_URL . "/" . self::API_VERSION . "/" . $extendURL;
     }
 
     /**
@@ -148,11 +152,7 @@ class Ontraport
         {
             return $this->getApi("CustomObjects", $object);
         }
-
-        else
-        {
-            throw new Exceptions\CustomObjectException();
-        }
+        throw new Exceptions\CustomObjectException();
     }
 
     /**
@@ -225,6 +225,14 @@ class Ontraport
     public function object()
     {
         return $this->getApi("Objects");
+    }
+
+    /**
+     * @return Webhooks
+     */
+    public function webhook()
+    {
+        return $this->getApi("Webhooks");
     }
 
     /**
