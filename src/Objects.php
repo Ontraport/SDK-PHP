@@ -12,12 +12,12 @@ namespace OntraportAPI;
 class Objects extends BaseApi
 {
     /**
-     * $var string endpoint for single object
+     * @var string endpoint for single object
      */
     protected $_endpoint = "object";
 
     /**
-     * $var string endpoint for plural object
+     * @var string endpoint for plural object
      */
     protected $_endpointPlural = "objects";
 
@@ -274,14 +274,16 @@ class Objects extends BaseApi
         $objects = $objects["data"];
 
         $customObjects = array();
-        foreach ($objects as $id => $data)
+        if (is_array($objects))
         {
-            if ($id >= 10000)
+            foreach ($objects as $id => $data)
             {
-                $customObjects[$id] = $data;
+                if ($id >= 10000)
+                {
+                    $customObjects[$id] = $data;
+                }
             }
         }
-
         return $customObjects;
     }
 
@@ -489,5 +491,75 @@ class Objects extends BaseApi
         );
         $options["headers"] = self::retrieveContentTypeHeader(self::CONTENT_TYPE_FORM);
         return $this->client->request($requestParams, $this->_endpointPlural . "/" . self::SUBSCRIBE, "delete", $requiredParams, $options);
+    }
+
+    /**
+     * @brief Retrieve Section and Field information for a given object
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with GET request.
+     *                               Varies by object.
+     *
+     * @return string JSON formatted HTTP response or error message
+     */
+    public function retrieveFields($requestParams)
+    {
+        $requiredParams = array(
+            "objectID"
+        );
+        return $this->client->request($requestParams, $this->_endpointPlural . "/" . self::FIELDEDITOR, "get", $requiredParams, $options = NULL);
+    }
+
+    /**
+     * @brief Create Sections and Fields in a given object record
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with POST request.
+     *                               Varies by object.
+     *
+     * @return string JSON formatted HTTP response or error message
+     */
+    public function createFields($requestParams)
+    {
+        $requiredParams = array(
+            "objectID",
+            "name",
+            "fields"
+        );
+        $options["headers"] = self::retrieveContentTypeHeader(self::CONTENT_TYPE_JSON);
+        return $this->client->request($requestParams, $this->_endpointPlural . "/" . self::FIELDEDITOR, "post", $requiredParams, $options);
+    }
+
+    /**
+     * @brief Update Sections and Fields in a given object record
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with PUT request.
+     *                               Varies by object.
+     *
+     * @return string JSON formatted HTTP response or error message
+     */
+    public function updateFields($requestParams)
+    {
+        $requiredParams = array(
+            "objectID",
+            "name",
+            "fields"
+        );
+        $options["headers"] = self::retrieveContentTypeHeader(self::CONTENT_TYPE_JSON);
+        return $this->client->request($requestParams, $this->_endpointPlural . "/" . self::FIELDEDITOR, "put", $requiredParams, $options);
+    }
+
+    /**
+     * @brief Delete Sections and Fields from a given object record
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with DELETE request.
+     *                               Varies by object.
+     *
+     * @return string JSON formatted HTTP response or error message
+     */
+    public function deleteFields($requestParams)
+    {
+        $requiredParams = array(
+            "objectID"
+        );
+        return $this->client->request($requestParams, $this->_endpointPlural . "/" . self::FIELDEDITOR, "delete", $requiredParams, $options = NULL);
     }
 }

@@ -29,12 +29,23 @@ class CurlClient
     /**
      * @var int the last HTTP status code received
      */
-    private $_lastStatusCode = null;
+    private $_lastStatusCode;
 
-    public function __construct($apiKey,$siteID)
+    public function __construct($apiKey = "", $siteID = "")
     {
-        $this->_setRequestHeader("Api-key", $apiKey);
-        $this->_setRequestHeader("Api-Appid", $siteID);
+        $this->setCredentials($apiKey, $siteID);
+    }
+
+    /**
+     * @brief sets API key credential
+     *
+     * @param string $apiKey
+     * @param string $siteID
+     */
+    public function setCredentials($apiKey, $siteID)
+    {
+        $this->setRequestHeader("Api-key", $apiKey);
+        $this->setRequestHeader("Api-Appid", $siteID);
     }
 
     /**
@@ -43,7 +54,7 @@ class CurlClient
      * @param string $header
      * @param string $value
      */
-    private function _setRequestHeader($header, $value)
+    public function setRequestHeader($header, $value)
     {
         $this->_requestHeaders[$header] = $header . ": " . $value;
     }
@@ -90,7 +101,7 @@ class CurlClient
     {
         $allowedMethods = $this->_getWhitelistedRequestTypes();
 
-        if (!in_array($method, $allowedMethods))
+        if (!in_array($method, $allowedMethods, true))
         {
             throw new Exceptions\HttpMethodException($method);
         }
@@ -115,7 +126,6 @@ class CurlClient
      *
      * @param array $requestParams
      * @param array $requiredParams
-     * @param string $url
      *
      * @return array $missingParams
      */
@@ -130,7 +140,7 @@ class CurlClient
                 if (!array_key_exists($requiredParam, $requestParams))
                 {
                     // Covers special case: when ids is required, group_ids can be substituted
-                    if ($requiredParam == "ids")
+                    if ($requiredParam === "ids")
                     {
                         if (!array_key_exists("group_ids", $requestParams))
                         {
@@ -158,6 +168,10 @@ class CurlClient
      * @param array $options
      *
      * @return string|boolean
+     *
+     * @throws Exceptions\TypeException
+     * @throws Exceptions\RequiredParamsException
+     * @throws Exceptions\HttpMethodException
      */
     public function httpRequest($requestParams, $url, $method, $requiredParams, $options)
     {
@@ -166,18 +180,19 @@ class CurlClient
             return false;
         }
 
-        if ($options && is_array($options))
+        if ($options &&
+            is_array($options) &&
+            array_key_exists("headers", $options) &&
+            is_array($options["headers"]))
         {
-            if (array_key_exists("headers", $options))
+            foreach ($options["headers"] as $header => $value)
             {
-                foreach ($options["headers"] as $header => $value)
-                {
-                    $this->_setRequestHeader($header, $value);
-                }
+                $this->setRequestHeader($header, $value);
             }
         }
 
-        if (array_key_exists("Content-Type", $this->_requestHeaders) && $this->_requestHeaders["Content-Type"] == "Content-Type: application/json")
+        if (array_key_exists("Content-Type", $this->_requestHeaders) &&
+            $this->_requestHeaders["Content-Type"] === "Content-Type: application/json")
         {
             $requestParams = json_encode($requestParams);
         }
@@ -208,7 +223,8 @@ class CurlClient
 
             case "delete":
                 curl_setopt($curlHandle, CURLOPT_CUSTOMREQUEST, "DELETE");
-                if (array_key_exists("Content-Type", $this->_requestHeaders) && $this->_requestHeaders["Content-Type"] == "Content-Type: application/json")
+                if (array_key_exists("Content-Type", $this->_requestHeaders) &&
+                    $this->_requestHeaders["Content-Type"] === "Content-Type: application/json")
                 {
                     curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $requestParams);
                 }

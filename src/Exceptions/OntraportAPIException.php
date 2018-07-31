@@ -108,3 +108,41 @@ class TypeException extends OntraportAPIException
         parent::__construct("Invalid input: expected array, received $type", 400);
     }
 }
+
+class FieldEditorException extends OntraportAPIException
+{
+    public function __construct($message, $code = 400)
+    {
+        parent::__construct($message, $code);
+    }
+}
+
+/**
+ * Class FieldTypeException
+ *
+ * @brief Thrown when attempting to create an ObjectField with an invalid data type.
+ *
+ * @package OntraportAPI
+ */
+class FieldTypeException extends FieldEditorException
+{
+    public function __construct($type)
+    {
+        parent::__construct("Invalid Field type: $type", 400);
+    }
+}
+
+/**
+ * Class InvalidColumnCount
+ *
+ * @brief Thrown when attempting to create an ObjectSection with an invalid column index.
+ *
+ * @package OntraportAPI
+ */
+class InvalidColumnIndex extends FieldEditorException
+{
+    public function __construct($index)
+    {
+        parent::__construct("Invalid column index: $index", 400);
+    }
+}

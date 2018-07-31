@@ -107,6 +107,8 @@ class CustomObjects extends Objects
     /**
      * @brief Retrieve meta for a contact object
      *
+     * @param mixed[]|null $requestParams
+     *
      * @return string JSON formatted meta for contact object
      */
     public function retrieveMeta($requestParams = NULL)
@@ -127,5 +129,61 @@ class CustomObjects extends Objects
     {
         $requestParams["objectID"] = $this->_objectID;
         return parent::retrieveCollectionInfo($requestParams);
+    }
+
+    /**
+     * @brief Retrieve Section and Field information for a given object
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with GET request.
+     *                               Varies by object.
+     *
+     * @return string JSON formatted HTTP response or error message
+     */
+    public function retrieveFields($requestParams)
+    {
+        $requestParams["objectID"] = $this->_objectID;
+        return parent::retrieveFields($requestParams);
+    }
+
+    /**
+     * @brief Create Sections and Fields in a given object record
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with POST request.
+     *                               Varies by object.
+     *
+     * @return string JSON formatted HTTP response or error message
+     */
+    public function createFields($requestParams)
+    {
+        $requestParams["objectID"] = $this->_objectID;
+        return parent::createFields($requestParams);
+    }
+
+    /**
+     * @brief Update Sections and Fields in a given object record
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with PUT request.
+     *                               Varies by object.
+     *
+     * @return string JSON formatted HTTP response or error message
+     */
+    public function updateFields($requestParams)
+    {
+        $requestParams["objectID"] = $this->_objectID;
+        return parent::updateFields($requestParams);
+    }
+
+    /**
+     * @brief Delete Sections and Fields from a given object record
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with DELETE request.
+     *                               Varies by object.
+     *
+     * @return string JSON formatted HTTP response or error message
+     */
+    public function deleteFields($requestParams)
+    {
+        $requestParams["objectID"] = $this->_objectID;
+        return parent::deleteFields($requestParams);
     }
 }
