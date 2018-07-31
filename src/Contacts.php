@@ -12,12 +12,12 @@ namespace OntraportAPI;
 class Contacts extends BaseApi
 {
     /**
-     * $var string endpoint for single contact
+     * @var string endpoint for single contact
      */
     protected $_endpoint = "Contact";
 
     /**
-     * $var string endpoint for plural contacts
+     * @var string endpoint for plural contacts
      */
     protected $_endpointPlural = "Contacts";
 
@@ -181,5 +181,57 @@ class Contacts extends BaseApi
     public function retrieveCollectionInfo($requestParams)
     {
         return parent::_retrieveCollectionInfo($requestParams);
+    }
+
+    /**
+     * @brief Retrieve Section and Field information for a given object
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with GET request.
+     *                               Varies by object.
+     *
+     * @return string JSON formatted HTTP response or error message
+     */
+    public function retrieveFields($requestParams)
+    {
+        return parent::_retrieveFields($requestParams);
+    }
+
+    /**
+     * @brief Create Sections and Fields in a given object record
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with POST request.
+     *                               Varies by object.
+     *
+     * @return string JSON formatted HTTP response or error message
+     */
+    public function createFields($requestParams)
+    {
+        return parent::_createFields($requestParams);
+    }
+
+    /**
+     * @brief Update Sections and Fields in a given object record
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with PUT request.
+     *                               Varies by object.
+     *
+     * @return string JSON formatted HTTP response or error message
+     */
+    public function updateFields($requestParams)
+    {
+        return parent::_updateFields($requestParams);
+    }
+
+    /**
+     * @brief Delete Sections and Fields from a given object record
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with DELETE request.
+     *                               Varies by object.
+     *
+     * @return string JSON formatted HTTP response or error message
+     */
+    public function deleteFields($requestParams)
+    {
+        return parent::_deleteFields($requestParams);
     }
 }

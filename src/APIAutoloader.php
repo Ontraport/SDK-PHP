@@ -13,23 +13,56 @@ class APIAutoloader
 {
     public static function loader($className)
     {
-        // Ensure correct path
-        if (strpos($className, "\\"))
+        $libraryBaseDir = __DIR__;
+        $namespace = "OntraportAPI";
+        $className = str_replace("\\\\", "\\", $className);
+
+        if ($className[0] === "\\")
         {
-            $tmp = explode("\\", $className);
-            $className = array_pop($tmp);
+            $className = substr($className, 1);
         }
 
-        $file = dirname(__FILE__) . "/" . $className . '.php';
+        // Does the fully-qualified classname start with our namespace?
+        if (strlen($className) <= strlen($namespace) || strncmp($className, $namespace, strlen($namespace)) !== 0)
+        {
+            return false;
+        }
 
-        if (file_exists($file))
+        $classPart = substr($className, strlen($namespace) + 1);
+        $classComponents = explode("\\", $classPart);
+        $classFile = $libraryBaseDir . "/" . implode("/", $classComponents);
+
+        // Determine the namespace root file.
+        $namespaceComponents = explode("\\", $namespace);
+        array_pop($classComponents);
+        $namespaceFile = $libraryBaseDir . "/";
+
+        if (empty($classComponents))
         {
-            require_once($file);
+            $namespaceFile .= end($namespaceComponents);
         }
-        else if (strpos($file, "Exception") !== false)
+        else
         {
-            require_once(dirname(__FILE__) . '/Exceptions/OntraportAPIException.php');
+            $lastComponent = end($classComponents);
+            if ($lastComponent === "Exceptions")
+            {
+                $lastComponent = "OntraportAPIException";
+            }
+            $namespaceFile .= implode("/", $classComponents) . "/" . $lastComponent;
         }
+        $found = false;
+        foreach (array($classFile, $namespaceFile) as $file)
+        {
+            $proposed = $file . ".php";
+            if (is_file($proposed))
+            {
+                require_once($proposed);
+                $found = true;
+                break;
+            }
+        }
+
+        return $found;
     }
 }
 

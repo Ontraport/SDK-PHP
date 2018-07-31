@@ -32,6 +32,11 @@ abstract class BaseApi
     const GET_INFO = "getInfo";
 
     /**
+     * @var string endpoint for all objects fieldeditor functions
+     */
+    const FIELDEDITOR = "fieldeditor";
+
+    /**
      * @var string constant for Content-Type header value type JSON-encoded
      */
     const CONTENT_TYPE_JSON = "json";
@@ -44,12 +49,12 @@ abstract class BaseApi
     /**
      * @var string endpoint for object
      */
-    protected $_endpoint = NULL;
+    protected $_endpoint;
 
     /**
      * @var string plural endpoint for object
      */
-    protected $_endpointPlural = NULL;
+    protected $_endpointPlural;
 
     /**
      * @param Ontraport $client
@@ -171,8 +176,6 @@ abstract class BaseApi
     /**
      * @brief Retrieve meta for an object
      *
-     * @param mixed[] $requestParams The parameters to submit with GET request. Ignored if not sent.
-     *
      * @return string JSON formatted meta for an object
      */
     protected function _retrieveMeta()
@@ -207,16 +210,73 @@ abstract class BaseApi
         return $this->client->request($requestParams, $this->_endpointPlural . "/" . self::GET_INFO, "get", $requiredParams = NULL, $options = NULL);
     }
 
+    /**
+     * @brief Retrieve Section and Field information for a given object
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with GET request.
+     *                               Varies by object.
+     *
+     * @return string JSON formatted HTTP response or error message
+     */
+    protected function _retrieveFields($requestParams)
+    {
+        return $this->client->request($requestParams, $this->_endpointPlural . "/" . self::FIELDEDITOR, "get", $requiredParams = NULL, $options = NULL);
+    }
+
+    /**
+     * @brief Create Sections and Fields in a given object record
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with POST request.
+     *                               Varies by object.
+     *
+     * @return string JSON formatted HTTP response or error message
+     */
+    protected function _createFields($requestParams)
+    {
+        $requiredParams = array("name", "fields");
+        $options["headers"] = self::retrieveContentTypeHeader(self::CONTENT_TYPE_FORM);
+        return $this->client->request($requestParams, $this->_endpointPlural . "/" . self::FIELDEDITOR, "post", $requiredParams, $options);
+    }
+
+    /**
+     * @brief Update Sections and Fields in a given object record
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with PUT request.
+     *                               Varies by object.
+     *
+     * @return string JSON formatted HTTP response or error message
+     */
+    protected function _updateFields($requestParams)
+    {
+        $requiredParams = array("name", "fields");
+        $options["headers"] = self::retrieveContentTypeHeader(self::CONTENT_TYPE_FORM);
+        return $this->client->request($requestParams, $this->_endpointPlural . "/" . self::FIELDEDITOR, "put", $requiredParams, $options);
+    }
+
+    /**
+     * @brief Delete Sections and Fields from a given object record
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with DELETE request.
+     *                               Varies by object.
+     *
+     * @return string JSON formatted HTTP response or error message
+     */
+    protected function _deleteFields($requestParams)
+    {
+        return $this->client->request($requestParams, $this->_endpointPlural . "/" . self::FIELDEDITOR, "delete", $requiredParams = NULL, $options = NULL);
+    }
+
     protected static function retrieveContentTypeHeader($encoding)
     {
-        if ($encoding == self::CONTENT_TYPE_FORM)
+        if ($encoding === self::CONTENT_TYPE_FORM)
         {
             return array("Content-Type" => "application/x-www-form-urlencoded");
         }
 
-        else if ($encoding == self::CONTENT_TYPE_JSON)
+        if ($encoding === self::CONTENT_TYPE_JSON)
         {
             return array("Content-Type" => "application/json");
         }
+        return array();
     }
 }
