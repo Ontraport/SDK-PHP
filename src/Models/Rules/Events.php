@@ -35,7 +35,7 @@ class Events
     // External Events
     const OBJECT_OPENS_EMAIL = "Contact_opens_email";
     const OBJECT_CLICKS_EMAIL_LINK = "Contact_clicks_emailanchor";
-    const OBJECT_SENDS_YOU_EMAIL = "Contact_sends_Email()";
+    const OBJECT_SENDS_YOU_EMAIL = "Contact_sends_Email";
     const SMS_RECEIVED = "sms_message_received";
     // Sales
     const OBJECT_PURCHASES_PRODUCT = "Contact_purchases_product";
