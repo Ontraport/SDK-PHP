@@ -30,7 +30,7 @@ class Actions
     const REMOVE_OBJECT_FROM_FULFILLMENT = "Remove_from_fulfillment";
     const REMOVE_FROM_ALL_FULFILLMENTS = "Remove_from_all_fulfillments";
     // Sales
-    const RECHARGE_ALL_TRANSACTIONS_IN_COLLECTIONS = "Recharge_all_declined_transactions()";
+    const RECHARGE_ALL_TRANSACTIONS_IN_COLLECTIONS = "Recharge_all_declined_transactions";
     const ADD_PRODUCT_TO_PURCHASE_HISTORY = "Add_product_to_purchase_history";
     const CANCEL_OPEN_ORDER = "Cancel_open_orders_with_product";
     // Messages

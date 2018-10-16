@@ -404,11 +404,11 @@ class RuleBuilder implements Request
                 $operators = self::_operatorClassifier($data["conditions"]);
                 $or_rule = $operators["or_rules"];
                 $and_rule = $operators["and_rules"];
-                $end_rule = $operators["end_rule"];
+                $first_rule = $operators["first_rule"];
                 // separate rule and param
                 $parsed = self::_parseParams($condition);
 
-                if (in_array($condition, $end_rule))
+                if (in_array($condition, $first_rule))
                 {
                     $builder->addCondition($parsed["name"], $parsed["params"]);
                 }
@@ -642,38 +642,37 @@ class RuleBuilder implements Request
     {
         $or_rules = array();
         $and_rules = array();
-        $end_rule = array();
+        $first_rule = array();
         $strlen = strlen($init_conditions);
-        $counter = 0;
+        $counter = $strlen - 1;
 
-        for($i = 0; $i <= $strlen; $i++)
+        for($i = $strlen - 1; $i >= 0; $i--)
         {
             $char = substr($init_conditions, $i, 1);
-
-            if ($char == "|" || $char == ";"|| $i == ($strlen - 1))
+            if ($char == "|" || $char == ";"|| $i == 0)
             {
-                $rule = substr($init_conditions, $counter, $i - $counter);
+                $rule = substr($init_conditions, $i + 1, $counter - $i);
                 $rule = trim($rule);
                 if ($char == "|")
                 {
-                    $or_rules[] = $rule;
+                    array_unshift($or_rules, $rule);
                 }
                 else if ($char == ";")
                 {
-                    $and_rules[] = $rule;
+                    array_unshift($and_rules, $rule);
                 }
-                else if ($i == ($strlen - 1))
+                else if ($i == 0)
                 {
-                    $rule = substr($init_conditions, $counter, $strlen - $counter);
-                    $end_rule[] = $rule;
+                    $rule = substr($init_conditions, 0,  $counter + 1);
+                    $first_rule[] = $rule;
                 }
-                $counter = $i + 1;
+                $counter = $i - 1;
             }
         }
         $operators = array(
             "or_rules" => $or_rules,
             "and_rules" => $and_rules,
-            "end_rule" => $end_rule
+            "first_rule" => $first_rule
         );
         return $operators;
     }
