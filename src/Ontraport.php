@@ -248,6 +248,22 @@ class Ontraport
     }
 
     /**
+     * @return Products
+     */
+    public function product()
+    {
+        return $this->getApi("Products");
+    }
+
+    /**
+     * @return Offers
+     */
+    public function offer()
+    {
+        return $this->getApi("Offers");
+    }
+
+    /**
      * @brief if requested API is already instantiated, grabs instance from an array, otherwise autoloads an instance of the API
      * @param string $class
      * @param integer|null $object
