@@ -94,7 +94,7 @@ class Offers extends BaseApi
      * @brief Create an offer
      *
      * @param mixed[] $requestParams Array of parameters to submit with POST request.
-     *                               Possible array keys: "name" (required), "data", "public"
+     *                               Possible array keys: "name" (required), "data" (required), "public"
      *
      * @return string JSON formatted response
      */
@@ -102,7 +102,8 @@ class Offers extends BaseApi
     {
         $options["headers"] = self::retrieveContentTypeHeader(self::CONTENT_TYPE_JSON);
         $requiredParams = array(
-            "name"
+            "name",
+            "data"
         );
         unset($requestParams["id"]);
 

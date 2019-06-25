@@ -105,6 +105,20 @@ class Forms extends BaseApi
     }
 
     /**
+     * @brief Retrieve HTML for a Form
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with GET request.
+     *                               Possible array keys: "id" (required)
+     *
+     * @return string JSON formatted response
+     */
+    public function retrieveFormHTML($requestParams)
+    {
+        return $this->retrieveSmartFormHTML($requestParams);
+    }
+
+    /**
+     * @deprecated For retrieveFormHTML above
      * @brief Retrieve HTML for a Smart Form
      *
      * @param mixed[] $requestParams Array of parameters to submit with GET request.

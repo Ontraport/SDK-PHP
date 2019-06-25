@@ -32,6 +32,7 @@ class Events
     const OBJECT_ADDED_OR_REMOVED_FROM_CAMPAIGN = "campaign_builder_object_change";
     const TASK_COMPLETED = "object_completed_task";
     const OBJECT_SUBMITS_FORM = "object_submits_form";
+    const CALL_IS_LOGGED = "call_is_logged";
     // External Events
     const OBJECT_OPENS_EMAIL = "Contact_opens_email";
     const OBJECT_CLICKS_EMAIL_LINK = "Contact_clicks_emailanchor";

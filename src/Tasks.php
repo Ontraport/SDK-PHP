@@ -39,6 +39,7 @@ class Tasks extends BaseApi
     const TASK_CANCEL = "cancel";
     const TASK_COMPLETE = "complete";
     const TASK_RESCHEDULE = "reschedule";
+    const TASK_REOPEN = "reopen";
 
     /**
      * @brief Retrieve a single specified task
@@ -182,5 +183,20 @@ class Tasks extends BaseApi
         $options["headers"] = self::retrieveContentTypeHeader(self::CONTENT_TYPE_JSON);
         $requiredParams = array("id");
         return $this->client->request($requestParams, $this->_mainTaskEndpoint . "/" . self::TASK_RESCHEDULE, "post", $requiredParams, $options);
+    }
+
+    /**
+     * @brief Reopens a task
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with POST request.
+     *                               Possible array keys: "ids" (required)
+     *
+     * @return string JSON formatted response
+     */
+    public function reopen($requestParams)
+    {
+        $options["headers"] = self::retrieveContentTypeHeader(self::CONTENT_TYPE_JSON);
+        $requiredParams = array("ids");
+        return $this->client->request($requestParams, $this->_mainTaskEndpoint . "/" . self::TASK_REOPEN, "post", $requiredParams, $options);
     }
 }
