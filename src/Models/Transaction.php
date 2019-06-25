@@ -10,6 +10,9 @@ class Transaction
     const CHARGE_NOW = "chargeNow";
     const LOG = "chargeLog";
 
+    const SUPPRESS = -1;
+    const DEFAULT_TEMP = 1;
+
     private $_contactId;
     private $_chargeNow;
     private $_gatewayId;
@@ -145,7 +148,7 @@ class Transaction
      * @brief Sets the invoice template in the transaction
      *
      * @param int $template_id The id of the invoice template to use
-     * note: To suppress invoices, set the $template_id to -1
+     * note: To suppress invoices, set the $template_id to const SUPPRESS
      *
      */
     public function setInvoiceTemplate($template_id)
@@ -156,10 +159,11 @@ class Transaction
     /**
      * @brief Sends an invoice for every recurring payment in this transaction
      *
+     * @param bool $recurring True => send, False => do not send
      */
-    public function sendRecurringInvoice()
+    public function sendRecurringInvoice($recurring)
     {
-        $this->_recurringInvoice = true;
+        $this->_recurringInvoice = $recurring;
     }
 
     /**

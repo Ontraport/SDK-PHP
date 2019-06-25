@@ -13,6 +13,9 @@ class Offer implements Request
     const QUARTER = "quarter";
     const YEAR = "year";
 
+    const SUPPRESS = -1;
+    const DEFAULT_TEMP = 1;
+
     private $_name;
     private $_id;
     private $_products = array();
@@ -47,7 +50,7 @@ class Offer implements Request
 
         if ($offer_data["shipping_charge_reoccurring_orders"] == true)
         {
-            $offer->chargeShippingForReoccurringOrders();
+            $offer->chargeShippingForReoccurringOrders(true);
         }
 
         if (!empty($offer_data["taxes"]))
@@ -391,6 +394,15 @@ class Offer implements Request
     }
 
     /**
+     * @brief Unsets the shipping information in the offer
+     * note: no parameters required because each offer can only have one shipping selection
+     */
+    public function unsetShipping()
+    {
+        $this->_shipping = array();
+    }
+
+    /**
      * @brief Deletes a tax that has been previously added
      *
      * @param $tax_id
@@ -412,10 +424,12 @@ class Offer implements Request
 
     /**
      * @brief Charge shipping for each reoccurring order
+     *
+     * @param bool $charge Whether or not to charge shipping on each reoccurring order
      */
-    public function chargeShippingForReoccurringOrders()
+    public function chargeShippingForReoccurringOrders($charge)
     {
-        $this->_shipping_charge_reoccurring_order = true;
+        $this->_shipping_charge_reoccurring_order = $charge;
     }
 
     /**
@@ -432,7 +446,7 @@ class Offer implements Request
      * @brief Sets the invoice template in the offer
      *
      * @param int $template_id The id of the invoice template to use
-     * note: To suppress invoices, set the $template_id to -1
+     * note: To suppress invoices, set the $template_id to const SUPPRESS
      *
      */
     public function setInvoiceTemplate($template_id)
@@ -444,10 +458,15 @@ class Offer implements Request
      * @brief Converts current object to an array for use as request parameters.
      *
      * @return array $requestParams Array of parameters for valid rule API request.
+     * @throws Exceptions\OntraportAPIException when $_products is empty
      */
     public function toRequestParams()
     {
         $requestParams = array();
+        if (empty($this->_products))
+        {
+            throw new Exceptions\OntraportAPIException("Offer must have a product.");
+        }
         $requestParams["name"] = $this->_name;
         $requestParams["public"] = 1;
         if ($this->_id)
