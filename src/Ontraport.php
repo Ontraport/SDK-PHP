@@ -254,6 +254,14 @@ class Ontraport
     {
         return $this->getApi("Products");
     }
+    
+    /**
+     * @return Products
+     */
+    public function purchase()
+    {
+        return $this->getApi("Purchases");
+    }
 
     /**
      * @return Offers
