@@ -44,14 +44,25 @@ class CurlClient
     private $_curlOptions = array();
 
     /**
+     * @var bool log curl requests and responses
+     */
+    private $_debug;
+
+    /**
+     * @var string file name for curl debugging log
+     */
+    private $_logFile = '/tmp/curl_data.log';
+
+    /**
      * @var int the last HTTP status code received
      */
     private $_lastStatusCode;
 
-    public function __construct($apiKey = "", $siteID = "", $keepBelowRateLimit = true)
+    public function __construct($apiKey = "", $siteID = "", $keepBelowRateLimit = true, $debug = false)
     {
         $this->setCredentials($apiKey, $siteID);
         $this->_keepBelowRateLimit = $keepBelowRateLimit;
+        $this->_debug = $debug;
     }
 
     /**
@@ -294,7 +305,37 @@ class CurlClient
         );
         curl_setopt($curlHandle, CURLOPT_TIMEOUT, 60);
 
+        /** ********** DEBUGGER ********** */
+        if ($this->_debug) {
+
+            // capture the PHP output
+            ob_start();
+            $out = fopen('php://output', 'w');
+
+            curl_setopt($curlHandle, CURLOPT_VERBOSE, true);
+            curl_setopt($curlHandle, CURLOPT_STDERR, $out);
+        }
+
         $result = curl_exec($curlHandle);
+
+        /** ********** DEBUGGER ********** */
+        if ($this->_debug) {
+
+            /** @noinspection PhpUndefinedVariableInspection */
+            fclose($out);
+
+            // get the curl output
+            $data = ob_get_clean();
+
+            // insert the request parameters sent
+            $data = preg_replace('/(\r?\n){2}/', "\n\n$requestParams\n\n", $data, 1);
+
+            // append the response received
+            $data .= "\n\n" . $result . "\n\n";
+
+            // write to a log file
+            file_put_contents($this->_logFile, $data, FILE_APPEND);
+        }
 
         $this->_responseHeaders = $headers;
 
@@ -383,5 +424,10 @@ class CurlClient
         {
             usleep(250000);
         }
+    }
+
+    public function setLogFile($fileName)
+    {
+        $this->_logFile = $fileName;
     }
 }
