@@ -76,7 +76,7 @@ class Actions
             self::SEND_POSTCARD => array('postcard_id'),
             self::ADD_TASK => array('task_id'),
             self::SEND_SMS => array('sms_id', 'number_id'),
-            self::PING_URL => array('url', 'post_data', 'json'),
+            self::PING_URL => array('webhook_id'), // deprecated parameters ('url', 'post_data', 'json')
             self::GIVE_WPMEMBERSHIPLVL_ACCESS => array('wpMembership_id'),
             self::REMOVE_WPMEMBERSHIPLVL_ACCESS => array('wpMembership_id'),
             self::UPDATE_FB_CUSTOM_AUDIENCE => array('add_remove', 'custom_audience_id'),

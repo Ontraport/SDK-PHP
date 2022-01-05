@@ -27,6 +27,11 @@ class CurlClient
     private $_requestHeaders = array();
 
     /**
+     * @var array of extra CURL options
+     */
+    private $_curlOptions = array();
+
+    /**
      * @var int the last HTTP status code received
      */
     private $_lastStatusCode;
@@ -67,6 +72,17 @@ class CurlClient
     public function getRequestHeaders()
     {
         return $this->_requestHeaders;
+    }
+
+    /**
+     * @brief sets an element in an array of headers to be sent with HTTP requests
+     *
+     * @param string $option
+     * @param string $value
+     */
+    public function setExtraOpt($option, $value)
+    {
+        $this->_curlOptions[$option] = $value;
     }
 
     /**
@@ -204,6 +220,9 @@ class CurlClient
 
         $curlHandle = curl_init();
         $headers = array();
+
+        curl_setopt_array($curlHandle, $this->_curlOptions);
+
         switch(strtolower($method))
         {
             case "post":

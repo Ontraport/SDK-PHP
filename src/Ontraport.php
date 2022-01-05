@@ -184,6 +184,15 @@ class Ontraport
     }
 
     /**
+     * @return Groups
+     */
+    public function group()
+    {
+        return $this->getApi("Groups");
+    }
+
+
+    /**
      * @return Forms
      */
     public function form()

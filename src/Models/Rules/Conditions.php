@@ -47,6 +47,7 @@ class Conditions
     const VISITED_LANDING_PAGE_N_TIMES = "Has_visited_landingpage_splittest_condition_n_times";
     const HAS_ACCESS_TO_WPMEMBERSHIPLVL = "Contact_has_access_to_wpintmembershiplevel";
     const NO_ACCESS_TO_WPMEMBERSHIPLVL = "Contact_does_not_have_access_to_wpintmembershiplevel";
+    const URL_CONDITION = "url_condition";
 
     public static function GetRequiredParams($rule)
     {
@@ -82,7 +83,8 @@ class Conditions
             self::VISITED_WP_PAGE_N_TIMES => array('wordpress_id', 'conditional', 'number'),
             self::VISITED_LANDING_PAGE_N_TIMES => array('landingPage_id', 'object_type_id', 'conditional', 'number'),
             self::HAS_ACCESS_TO_WPMEMBERSHIPLVL => array('wpMembership_id'),
-            self::NO_ACCESS_TO_WPMEMBERSHIPLVL => array('wpMembership_id')
+            self::NO_ACCESS_TO_WPMEMBERSHIPLVL => array('wpMembership_id'),
+            self::URL_CONDITION => array('conditional','text')
         );
         return $requiredParams[$rule];
 

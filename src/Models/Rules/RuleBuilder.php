@@ -158,7 +158,7 @@ class RuleBuilder implements Request
         // if no missing or invalid rule parameters
         if ($check_params)
         {
-            $value = $this->_formatParams($eventParams);
+            $value = self::_formatParams($eventParams);
             $rule = $event . "(" . $value . ")";
             $this->_events[] = $rule;
 
@@ -219,7 +219,7 @@ class RuleBuilder implements Request
         // if no missing or invalid rule parameters
         if ($check_params)
         {
-            $value = $this->_formatParams($conditionParams);
+            $value = self::_formatParams($conditionParams);
             $formatted = "(" . $value . ")";
             $this->_conditions[] = $rule . $formatted;
 
@@ -236,6 +236,7 @@ class RuleBuilder implements Request
      *
      * @return boolean False if unsuccessful
      * @return array Array of currently stored actions in object
+     * @throws Exceptions\OntraportAPIException
      */
     public function addAction($action, $actionParams)
     {
@@ -257,13 +258,15 @@ class RuleBuilder implements Request
             // special formatting for ping_url
             if ($action == Actions::PING_URL)
             {
-                $formatted = $this->_formatParams($actionParams, "::");
+                // if deprecated usage, will concatenate with ::
+                // if webhook_id usage, will be stand-alone
+                $formatted = self::_formatParams($actionParams, "::");
                 $this->_actions[] = $action . "(" . $formatted . ")";
 
                 return $this->_actions;
             }
             // general formatting for actions
-            $value = $this->_formatParams($actionParams);
+            $value = self::_formatParams($actionParams);
             $formatted = "(" . $value . ")";
             $this->_actions[] = $rule . $formatted;
 
@@ -503,7 +506,7 @@ class RuleBuilder implements Request
         // exceptions for parameter length for ping url
         if ($exception == true)
         {
-            if (count($requestParams) == 0)
+            if (count($requestParams) == 0 || count($requestParams) > 3)
             {
                 throw new Exceptions\OntraportAPIException("Invalid number of parameters for rule. " .
                 "Refer to the API Doc to make sure you have the correct inputs.");
@@ -574,10 +577,10 @@ class RuleBuilder implements Request
      *
      * @return string Formatted rule parameters
      */
-    private function _formatParams($requestParams, $delimiter = ",")
+    private static function _formatParams($requestParams, $delimiter = ",")
     {
         $formatted = "";
-        foreach($requestParams as $param)
+        foreach ($requestParams as $param)
         {
             $formatted = $formatted . $param . $delimiter;
         }
@@ -591,7 +594,7 @@ class RuleBuilder implements Request
      * @param string $rule Valid formatted rule
      * @return array $parsed Array with "name" => rule type, "params" => rule parameters
      */
-    private function _parseParams($rule)
+    private static function _parseParams($rule)
     {
         $parsed = array();
 
@@ -619,7 +622,7 @@ class RuleBuilder implements Request
      * @param string $init_rule
      * @return array $rules
      */
-    private function _splitRule($init_rule)
+    private static function _splitRule($init_rule)
     {
         $rules = array();
         $init_rule = str_replace("|", ";", $init_rule);
@@ -638,7 +641,7 @@ class RuleBuilder implements Request
      *
      * @return array Conditions classified
      */
-    private function _operatorClassifier($init_conditions)
+    private static function _operatorClassifier($init_conditions)
     {
         $or_rules = array();
         $and_rules = array();
