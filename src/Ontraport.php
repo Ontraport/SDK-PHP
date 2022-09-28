@@ -265,11 +265,51 @@ class Ontraport
     }
 
     /**
+     * @return Purchases
+     */
+    public function purchase()
+    {
+        return $this->getApi("Purchases");
+    }
+
+    /**
+     * @return PurchaseLogs
+     */
+    public function purchaselog()
+    {
+        return $this->getApi("PurchaseLogs");
+    }
+
+    /**
      * @return Offers
      */
     public function offer()
     {
         return $this->getApi("Offers");
+    }
+
+    /**
+     * @return OpenOrders
+     */
+    public function openorder()
+    {
+        return $this->getApi("OpenOrders");
+    }
+
+    /**
+     * @return Orders
+     */
+    public function order()
+    {
+        return $this->getApi("Orders");
+    }
+
+    /**
+     * @return Tags
+     */
+    public function tag()
+    {
+        return $this->getApi("Tags");
     }
 
     /**
