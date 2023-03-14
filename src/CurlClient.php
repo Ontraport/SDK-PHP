@@ -20,6 +20,9 @@ class CurlClient
     const HTTP_ERROR = 500;
 
     const RATE_LIMIT_RESET = "x-rate-limit-reset";
+    const RATE_LIMIT = "x-rate-limit";
+    const RATE_LIMIT_REMAINING = "x-rate-limit-remaining";
+    const DEFAULT_RATE_LIMIT = 180;
 
     /**
      * @var array of headers sent with HTTP requests
@@ -27,18 +30,40 @@ class CurlClient
     private $_requestHeaders = array();
 
     /**
+     * @var array of headers received with HTTP responses
+     */
+    private static $_responseHeaders = array();
+
+    /**
+     * @var bool keep the request rate below the API rate limit
+     */
+    private $_keepBelowRateLimit;
+
+	/**
      * @var array of extra CURL options
      */
     private $_curlOptions = array();
+
+    /**
+     * @var bool log curl requests and responses
+     */
+    private $_debug;
+
+    /**
+     * @var string file name for curl debugging log
+     */
+    private $_logFile = '/tmp/curl_data.log';
 
     /**
      * @var int the last HTTP status code received
      */
     private $_lastStatusCode;
 
-    public function __construct($apiKey = "", $siteID = "")
+    public function __construct($apiKey = "", $siteID = "", $keepBelowRateLimit = true, $debug = false)
     {
         $this->setCredentials($apiKey, $siteID);
+        $this->_keepBelowRateLimit = $keepBelowRateLimit;
+        $this->_debug = $debug;
     }
 
     /**
@@ -196,6 +221,11 @@ class CurlClient
             return false;
         }
 
+        if ($this->_keepBelowRateLimit)
+        {
+            $this->_checkRateLimit();
+        }
+
         if ($options &&
             is_array($options) &&
             array_key_exists("headers", $options) &&
@@ -274,9 +304,42 @@ class CurlClient
                 return $len;
             }
         );
-        curl_setopt($curlHandle, CURLOPT_TIMEOUT, 60);
+        curl_setopt($curlHandle, CURLOPT_CONNECTTIMEOUT, 30);
+        curl_setopt($curlHandle, CURLOPT_TIMEOUT, 60 * 2);
+
+        /** ********** DEBUGGER ********** */
+        if ($this->_debug) {
+
+            // capture the PHP output
+            ob_start();
+            $out = fopen('php://output', 'w');
+
+            curl_setopt($curlHandle, CURLOPT_VERBOSE, true);
+            curl_setopt($curlHandle, CURLOPT_STDERR, $out);
+        }
 
         $result = curl_exec($curlHandle);
+
+        /** ********** DEBUGGER ********** */
+        if ($this->_debug) {
+
+            /** @noinspection PhpUndefinedVariableInspection */
+            fclose($out);
+
+            // get the curl output
+            $data = ob_get_clean();
+
+            // insert the request parameters sent
+            $data = preg_replace('/(\r?\n){2}/', "\n\n$requestParams\n\n", $data, 1);
+
+            // append the response received
+            $data .= "\n\n" . $result . "\n\n";
+
+            // write to a log file
+            file_put_contents($this->_logFile, $data, FILE_APPEND);
+        }
+
+        self::$_responseHeaders = $headers;
 
         $this->_lastStatusCode = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
         if ($this->_lastStatusCode == self::HTTP_RATE_LIMIT)
@@ -324,5 +387,49 @@ class CurlClient
         $result = curl_exec($curlHandle);
         $this->_lastStatusCode = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
         return $result;
+    }
+
+    private function _checkRateLimit()
+    {
+        // If no API calls have been made, no need to delay.
+        if (empty(self::$_responseHeaders))
+        {
+            return;
+        }
+
+        // Default the $limit and $remaining values if not set in the last response header.
+        /** @var int $limit */
+        $limit = isset(self::$_responseHeaders[self::RATE_LIMIT])
+                    ? (int)self::$_responseHeaders[self::RATE_LIMIT]
+                    : self::DEFAULT_RATE_LIMIT;
+
+        /** @var int $remaining */
+        $remaining = isset(self::$_responseHeaders[self::RATE_LIMIT_REMAINING])
+                        ? (int)self::$_responseHeaders[self::RATE_LIMIT_REMAINING]
+                        : self::DEFAULT_RATE_LIMIT;
+
+        // If no API calls have been made, no need to delay.
+        if ($limit == $remaining)
+        {
+            return;
+        }
+
+        // If we are below 5% remaining, sleep for 0.50 seconds.
+        if ($remaining / $limit < 0.05)
+        {
+            usleep(500000);
+            return;
+        }
+
+        // If we are below 10% remaining, sleep for 0.25 seconds.
+        if ($remaining / $limit < 0.1)
+        {
+            usleep(250000);
+        }
+    }
+
+    public function setLogFile($fileName)
+    {
+        $this->_logFile = $fileName;
     }
 }
