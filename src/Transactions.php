@@ -34,8 +34,10 @@ class Transactions extends BaseApi
     const CONVERT_DECLINE = "convertToDecline";
     const MARK_PAID = "markPaid";
     const ORDER = "order";
+    const PAY_INVOICE = "payInvoice";
     const PROCESS_MANUAL = "processManual";
     const REFUND = "refund";
+    const TOKENIZE_SESSION = "tokenizeSession";
     const RERUN = "rerun";
     const RERUN_COMMISSION = "rerunCommission";
     const RESEND_INVOICE = "resendInvoice";
@@ -206,6 +208,105 @@ class Transactions extends BaseApi
             "offer"
         );
         return $this->client->request($requestParams, $this->_mainTransactionEndpoint . "/" . self::PROCESS_MANUAL, "post", $requiredParams, $options);
+    }
+
+    /**
+     * @brief Pay an open invoice with one of the contact's saved credit cards.
+     *
+     * @param mixed[] $requestParams Array of parameters to submit with POST request.
+     *                               Possible array keys: "invoice_id" (required), "cc_id",
+     *                                                    "payer" (token form only: "pci_card_token" or "pci_cvc_token")
+     *
+     * @return string JSON formatted HTTP response
+     */
+    public function payInvoice($requestParams)
+    {
+        $options["headers"] = self::retrieveContentTypeHeader(self::CONTENT_TYPE_JSON);
+        $requiredParams = array(
+            "invoice_id"
+        );
+        return $this->client->request($requestParams, $this->_mainTransactionEndpoint . "/" . self::PAY_INVOICE, "post", $requiredParams, $options);
+    }
+
+    /**
+     * @brief Create a card tokenization session: everything needed to send card data
+     *        directly to Ontraport's PCI-secured domain instead of to this API.
+     *        See tokenizeCard() for the whole flow in one call.
+     *
+     * @return string JSON formatted HTTP response whose data contains:
+     *                "url" (where to POST the card fields), "aid", "hash" (single-use),
+     *                and "expires_in" (seconds the hash is guaranteed valid)
+     */
+    public function tokenizeSession()
+    {
+        return $this->client->request(array(), $this->_mainTransactionEndpoint . "/" . self::TOKENIZE_SESSION, "post", array(), array());
+    }
+
+    /**
+     * @brief Tokenize a card in one call: creates a tokenization session, sends the card
+     *        fields directly to the PCI url from that session (never to the regular API),
+     *        and returns the single-use token to pass as payer["pci_card_token"] --
+     *        or payer["pci_cvc_token"] when using the "cvc_only" form -- to
+     *        processManual() or payInvoice(). This is the recommended way to send card
+     *        data; sending raw card numbers in charge calls is discouraged and will
+     *        eventually be retired.
+     *
+     * @param mixed[] $card_fields Form fields for the tokenizer. Keys:
+     *                             "payment_number", "payment_code" (optional CVV),
+     *                             "payment_expire_month", "payment_expire_year",
+     *                             "payment_name" (optional) -- or, to refresh only the
+     *                             security code of a saved card: "cvc_only" => 1 with
+     *                             just "payment_code" (this helper supplies the
+     *                             tokenizer's required "cvconly" placeholder number
+     *                             automatically).
+     *
+     * @throws \OntraportAPI\Exceptions\OntraportAPIException on session or tokenization failure
+     *
+     * @return string the single-use exchange token (valid for one use, for about 5 minutes)
+     */
+    public function tokenizeCard($card_fields)
+    {
+        $session_response = json_decode($this->tokenizeSession(), true);
+        $session = (is_array($session_response) && isset($session_response["data"])) ? $session_response["data"] : null;
+        if (empty($session["url"]) || empty($session["hash"]) || empty($session["aid"]))
+        {
+            throw new \OntraportAPI\Exceptions\OntraportAPIException("Unable to create a tokenization session.");
+        }
+
+        // The tokenizer's CVC-only form still requires a card-number field carrying
+        // the literal "cvconly" placeholder; supply it so callers don't have to know.
+        if (!empty($card_fields["cvc_only"]) && empty($card_fields["payment_number"]))
+        {
+            $card_fields["payment_number"] = "cvconly";
+        }
+
+        $post_fields = array_merge($card_fields, array(
+            "aid" => $session["aid"],
+            "hash" => $session["hash"]
+        ));
+
+        $curl_handle = curl_init($session["url"]);
+        curl_setopt_array($curl_handle, array(
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => http_build_query($post_fields),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 40,
+            CURLOPT_HTTPHEADER => array(
+                "Content-Type: application/x-www-form-urlencoded",
+                "Accept: application/json"
+            )
+        ));
+        $tokenize_response = curl_exec($curl_handle);
+        curl_close($curl_handle);
+
+        $tokenized = json_decode($tokenize_response, true);
+        if (!is_array($tokenized) || !isset($tokenized["status"]) || $tokenized["status"] !== "OK" || empty($tokenized["token"]))
+        {
+            $message = (is_array($tokenized) && isset($tokenized["message"])) ? $tokenized["message"] : "Card tokenization failed.";
+            throw new \OntraportAPI\Exceptions\OntraportAPIException($message);
+        }
+
+        return $tokenized["token"];
     }
 
     /**

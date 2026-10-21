@@ -100,7 +100,15 @@ class Transaction
     /**
      * @brief Sets the payer information in the transaction if no default, or other is preferred
      *
-     * @param array/int $payer Array containing payer info
+     * @param array/int $payer An integer selects a saved card by cc_id. An array carries
+     *                         card data in one of three forms:
+     *                         array("pci_card_token" => ...) -- a single-use token from
+     *                         Transactions::tokenizeCard(); the RECOMMENDED form;
+     *                         array("pci_cvc_token" => ...) -- a fresh security code for
+     *                         the saved card selected with setPayer($cc_id);
+     *                         or the legacy raw form ("ccnumber", "code", "expire_month",
+     *                         "expire_year"), which is discouraged and slated for
+     *                         retirement in favor of tokenization.
      * note: document different gateway requirements
      *
      * @throws Exceptions\OntraportAPIException
@@ -110,8 +118,33 @@ class Transaction
     {
         if (is_array($payer))
         {
-            $keys = array("ccnumber", "code", "expire_month", "expire_year");
             $given_keys = array_keys($payer);
+
+            // Single-use exchange tokens from the tokenization flow
+            // (Transactions::tokenizeCard()) -- the recommended way to send card
+            // data. A pci_card_token carries the card number, security code, and
+            // expiration, so it needs no companion keys.
+            if (in_array("pci_card_token", $given_keys))
+            {
+                $this->_ccId = null;
+                $this->_payer = $payer;
+
+                return;
+            }
+
+            // A pci_cvc_token supplies a freshly collected security code for a
+            // saved card, so it deliberately KEEPS any cc_id already set via
+            // setPayer($cc_id).
+            if (in_array("pci_cvc_token", $given_keys))
+            {
+                $this->_payer = array_merge($this->_payer, $payer);
+
+                return;
+            }
+
+            // Raw card data. Still supported, but discouraged: this path is slated
+            // for retirement in favor of the tokenization flow above.
+            $keys = array("ccnumber", "code", "expire_month", "expire_year");
             $missing_keys = array();
             // allow "code" to be optional
             foreach ($keys as $key)
